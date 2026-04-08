@@ -1,0 +1,37 @@
+{
+    "name": "codeguard-vscode",
+    "displayName": "CodeGuard AI",
+    "description": "Real-time plagiarism and AI detection for students.",
+    "version": "1.0.0",
+    "publisher": "codeguard",
+    "engines": {
+        "vscode": "^1.75.0"
+    },
+    "categories": [
+        "Linters",
+        "Education"
+    ],
+    "activationEvents": [
+        "onLanguage:javascript",
+        "onLanguage:python"
+    ],
+    "main": "./extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "codeguard.scanFile",
+                "title": "CodeGuard: Scan File for Plagiarism"
+            }
+        ],
+        "configuration": {
+            "title": "CodeGuard Settings",
+            "properties": {
+                "codeguard.apiKey": {
+                    "type": "string",
+                    "default": "",
+                    "description": "API Key for CodeGuard services."
+                }
+            }
+        }
+    }
+}

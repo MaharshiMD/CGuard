@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Log in to CodeGuard AI to access the forensic code analysis dashboard.">
+    <meta name="theme-color" content="#0a192f">
+    <title>System Access | CodeGuard AI</title>
+    <link rel="manifest" href="manifest.json">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css?v=5">
+</head>
+
+<body>
+
+    <div class="grid-bg"></div>
+
+    <div class="login-wrapper">
+        <div class="login-card">
+
+            <div class="login-header">
+                <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Return to Base</a>
+                <div class="logo">
+                    <i class="fa-solid fa-shield-halved"></i> CodeGuard
+                </div>
+                <h2>System Access</h2>
+                <p>Enter credentials to access the AST Engine.</p>
+            </div>
+
+            <div class="social-login">
+                <button type="button" class="btn-social github" onclick="handleGithubLogin()" title="Continue with GitHub">
+                    <i class="fa-brands fa-github"></i> Continue with GitHub
+                </button>
+                <button type="button" class="btn-social google" onclick="handleGoogleLogin()" title="Continue with Google">
+                    <i class="fa-brands fa-google"></i>
+                </button>
+                <button type="button" class="btn-social apple" onclick="handleAppleLogin()" title="Continue with Apple ID">
+                    <i class="fa-brands fa-apple"></i>
+                </button>
+            </div>
+
+            <div class="divider">
+                <span>OR</span>
+            </div>
+
+            <form id="manual-login-form" class="login-form">
+                <div class="input-group">
+                    <label>Developer ID / Email</label>
+                    <div class="input-field">
+                        <i class="fa-solid fa-user-astronaut"></i>
+                        <input type="email" id="login-email" placeholder="name@company.com" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Access Key / Password</label>
+                    <div class="input-field">
+                        <i class="fa-solid fa-key"></i>
+                        <input type="password" id="login-password" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-login-submit">Authenticate <i
+                        class="fa-solid fa-chevron-right"></i></button>
+            </form>
+
+            <div class="login-footer">
+                <p>New to the platform? <a href="signup.html">Sign up here</a></p>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="script.js"></script>
+</body>
+
+</html>

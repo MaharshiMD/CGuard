@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CodeGuard AI forensic analysis report – detailed plagiarism, AI generation, and code similarity results.">
+    <meta name="theme-color" content="#0a192f">
+    <title>Analysis Report | CodeGuard AI</title>
+    <link rel="manifest" href="manifest.json">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css?v=18">
+    <!-- html2pdf Library for generating professional PDF reports -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+        integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+
+<body>
+
+    <header class="report-header">
+        <div class="logo">
+            <a href="dashboard.html"><i class="fa-solid fa-arrow-left"></i> Back to Console</a>
+        </div>
+        <div class="report-meta">
+            <span id="case-id-display">Case ID: #8829-AF</span>
+            <button class="btn-primary" onclick="downloadCurrentReport()"><i class="fa-solid fa-download"></i> Download
+                PDF</button>
+        </div>
+    </header>
+
+    <div class="report-container">
+
+        <aside class="report-sidebar">
+
+            <div class="score-card danger">
+                <h3>Plagiarism / Risk Score</h3>
+                <div class="score-circle">
+                    <svg viewBox="0 0 36 36" class="circular-chart green">
+                        <path class="circle-bg"
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <path class="circle" stroke-dasharray="0, 100"
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <text x="18" y="20.35" class="percentage" id="display-score">0%</text>
+                    </svg>
+                </div>
+                <p class="risk-label" id="risk-label">Calculating Risk...</p>
+            </div>
+
+            <div class="score-card warning">
+                <h3>AI Probability</h3>
+                <div class="bar-chart">
+                    <div class="bar-fill" id="ai-bar" style="width: 0%;"></div>
+                </div>
+                <p class="score-text" id="ai-text">Analyzing...</p>
+            </div>
+
+            <div class="details-card">
+                <h4>Analysis Engines</h4>
+                <div class="engine-metric">
+                    <span>AST Structural</span>
+                    <span class="value" id="structural-val">0%</span>
+                </div>
+                <div class="engine-metric">
+                    <span>Token Winnowing</span>
+                    <span class="value" id="fingerprint-val">0%</span>
+                </div>
+                <div class="engine-metric">
+                    <span>Semantic Logic</span>
+                    <span class="value" id="semantic-val">0%</span>
+                </div>
+                <div class="engine-metric">
+                    <span>Stylometry</span>
+                    <span class="value" id="stylometry-val">0%</span>
+                </div>
+                <div class="engine-metric">
+                    <span>Cross-Language</span>
+                    <span class="value" id="cross-lang-val">No</span>
+                </div>
+                <div class="engine-metric">
+                    <span>Logical PDG</span>
+                    <span class="value" id="pdg-val">0%</span>
+                </div>
+            </div>
+
+            <div class="sources-list">
+                <h4>Matched Source</h4>
+                <ul>
+                    <li>
+                        <i class="fa-solid fa-link"></i>
+                        <a href="#" id="detected-source-url" target="_blank">Detecting...</a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="code-viewer">
+
+            <div class="viewer-header">
+                <div class="file-tab original">
+                    <i class="fa-solid fa-file-code"></i> <span id="display-filename">unknown.py</span>
+                </div>
+                <div class="file-tab source">
+                    <i class="fa-solid fa-database"></i> Source Comparison
+                </div>
+            </div>
+
+            <div class="diff-container">
+                <div class="code-pane" style="background: #0f172a; padding: 15px;">
+                    <pre
+                        style="margin: 0;"><code id="display-code" style="color: #a6accd; font-family: 'Fira Code', monospace; font-size: 14px; line-height: 1.5; white-space: pre-wrap;">Loading your uploaded code...</code></pre>
+                </div>
+
+                <div class="code-pane" id="comparison-pane"
+                    style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0b1120; color: #64748b; text-align: center; overflow: auto; padding: 15px;">
+                    <i class="fa-solid fa-lock" style="font-size: 32px; margin-bottom: 15px; opacity: 0.5;"></i>
+                    <p style="font-size: 14px; max-width: 80%;">Source code content is protected or unavailable for
+                        direct preview.</p>
+                </div>
+
+            </div>
+
+            <div class="logic-insight">
+                <i class="fa-solid fa-robot"></i>
+                <strong>AI Logic Analysis:</strong> <span id="ai-explanation">Loading analysis...</span>
+            </div>
+
+
+
+        </main>
+    </div>
+
+    <script type="module" src="script.js?v=18"></script>
+
+</body>
+
+</html>

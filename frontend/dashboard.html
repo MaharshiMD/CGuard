@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CodeGuard AI forensic analysis console – scan code for plagiarism, AI generation, and logic similarity.">
+    <meta name="theme-color" content="#0a192f">
+    <title>Console | CodeGuard AI</title>
+    <link rel="manifest" href="manifest.json">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css?v=5">
+    <!-- JSZip for ZIP file scanning -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- html2pdf Library for generating professional PDF reports -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+        integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- PDF.js for client-side PDF text extraction -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <!-- Mammoth.js for client-side DOCX text extraction -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
+</head>
+
+<body>
+
+    <div class="dashboard-container">
+
+        <aside class="sidebar">
+            <div class="sidebar-header" style="display: flex; align-items: center; gap: 15px;">
+                <i class="fa-solid fa-bars" id="sidebar-toggle" style="cursor: pointer; font-size: 1.4rem;" title="Toggle Sidebar"></i>
+                <div class="sidebar-logo-content" style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-solid fa-shield-halved" style="font-size: 1.4rem;"></i> <span class="sidebar-text">CodeGuard</span>
+                </div>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="active" id="menu-new-scan"><a href="#"><i class="fa-solid fa-plus" style="min-width: 20px; text-align: center;"></i> <span class="sidebar-text">New Scan</span></a></li>
+                <li id="menu-paper-plagiarism"><a href="#"><i class="fa-solid fa-file-signature" style="min-width: 20px; text-align: center;"></i> <span class="sidebar-text">Paper Plagiarism</span></a></li>
+                <li id="menu-history"><a href="#"><i class="fa-solid fa-clock-rotate-left" style="min-width: 20px; text-align: center;"></i> <span class="sidebar-text">History</span></a></li>
+                <li id="menu-repos"><a href="#"><i class="fa-brands fa-github" style="min-width: 20px; text-align: center;"></i> <span class="sidebar-text">Repositories</span></a></li>
+                <li id="menu-reports"><a href="#"><i class="fa-solid fa-chart-pie" style="min-width: 20px; text-align: center;"></i> <span class="sidebar-text">Reports</span></a></li>
+                <li id="menu-compare"><a href="#"><i class="fa-solid fa-layer-group" style="min-width: 20px; text-align: center;"></i> <span class="sidebar-text">Bulk Comparison</span></a></li>
+                <li id="menu-reading-level"><a href="#"><i class="fa-solid fa-book-open" style="min-width: 20px; text-align: center;"></i> <span class="sidebar-text">Reading Level</span></a></li>
+                <li id="menu-settings"><a href="#"><i class="fa-solid fa-sliders" style="min-width: 20px; text-align: center;"></i> <span class="sidebar-text">Settings</span></a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <a href="#" onclick="handleLogout(); return false;"><i class="fa-solid fa-right-from-bracket" style="min-width: 20px; text-align: center;"></i> <span class="sidebar-text">Logout</span></a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+
+            <header class="top-bar">
+                <div style="display: flex; align-items: center;">
+                    <i class="fa-solid fa-bars mobile-hamburger" id="mobile-sidebar-toggle" style="cursor: pointer; font-size: 1.5rem; margin-right: 15px; display: none; color: var(--white);" onclick="event.stopPropagation(); document.body.classList.add('mobile-open')"></i>
+                    <h2>Forensic Analysis Console</h2>
+                </div>
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <button id="theme-toggle" class="theme-toggle-btn" title="Toggle Light Mode">
+                        <i class="fa-solid fa-sun"></i>
+                    </button>
+                    <div class="user-profile">
+                        <span class="status-dot"></span>
+                        <span id="user-name">Loading...</span>
+                        <img id="user-avatar" src="https://i.pravatar.cc/100?img=33" alt="User">
+                    </div>
+                </div>
+            </header>
+
+            <section id="section-new-scan" class="dashboard-section">
+                <div class="upload-wrapper">
+                    <div class="upload-card">
+                        <h3><i class="fa-solid fa-cloud-arrow-up"></i> Upload Source Code</h3>
+                        <p>Supported formats: .zip, .py, .java, .cpp, .js</p>
+
+                        <div class="drop-zone" id="drop-zone">
+                            <i class="fa-solid fa-folder-open"></i>
+                            <h4 id="drop-text">Drag & Drop files here</h4>
+                            <p>or</p>
+
+                            <input type="file" id="real-file-input" style="display: none;" accept=".zip,.py,.java,.cpp,.js,.c,.cs,.php,.html,.css,.ts,.go,.rs">
+
+                            <button class="btn-primary"
+                                onclick="document.getElementById('real-file-input').click()">Browse
+                                Files</button>
+                        </div>
+
+                        <div class="scan-options">
+                            <label>
+                                <input type="checkbox" id="scan-opt-logic" checked> Check Logic Similarity (AST)
+                            </label>
+                            <label>
+                                <input type="checkbox" id="scan-opt-ai" checked> Detect AI Generation
+                            </label>
+                        </div>
+
+                        <button class="btn-scan" id="scan-btn" onclick="startScan()">INITIALIZE SCAN <i
+                                class="fa-solid fa-bolt"></i></button>
+
+                    </div>
+
+                    <div class="terminal-log">
+                        <div class="terminal-header">
+                            <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+                            <span>system_log --monitor</span>
+                        </div>
+                        <div class="terminal-body">
+                            <p>> System ready...</p>
+                            <p>> Waiting for input stream...</p>
+                            <p class="blink">_</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-scans">
+                    <h3>Recent Activity</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>File Name</th>
+                                <th>Date</th>
+                                <th>Plagiarism</th>
+                                <th>AI Prob.</th>
+                                <th>Status</th>
+                                <th>Risk Level</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body-quick">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="section-history" class="dashboard-section" style="display: none;">
+                <div class="recent-scans">
+                    <h3>Full Scan History</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>File Name</th>
+                                <th>Date</th>
+                                <th>Plagiarism</th>
+                                <th>AI Prob.</th>
+                                <th>Status</th>
+                                <th>Risk Level</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body-full">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="section-repos" class="dashboard-section" style="display: none;">
+                <div class="upload-card">
+                    <h3><i class="fa-brands fa-github"></i> Connected Repositories</h3>
+                    <p>Manage your linked version control systems.</p>
+                    <div class="repo-list" id="repo-list-container" style="margin-top: 20px;">
+                        <p id="repo-status">No repositories connected yet.</p>
+                        <button class="btn-primary" id="connect-github-btn" style="margin-top: 10px;">Connect
+                            GitHub</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="section-reports" class="dashboard-section" style="display: none;">
+                <div class="upload-card">
+                    <h3><i class="fa-solid fa-chart-pie"></i> Generated Reports</h3>
+                    <p>Download or share your forensic analysis reports.</p>
+                    <div id="reports-list-container" style="margin-top: 20px;">
+                        <p>No reports available yet. Run a scan to generate a report.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bulk Comparison Section -->
+            <section id="section-compare" class="dashboard-section" style="display: none;">
+                
+                <!-- Initial View: Choose Option -->
+                <div id="compare-selection-view">
+                    <h2 style="color: var(--white); font-size: 2rem; margin-bottom: 5px;">Bulk Comparison</h2>
+                    <p style="color: var(--text-muted); margin-bottom: 40px;">Compare groups of documents at the speed of light.</p>
+                    
+                    <div class="compare-cards-grid">
+                        <div class="compare-card" onclick="showCompareView('group')">
+                            <div class="card-icon-area">
+                                <div class="icon-block">A</div>
+                                <i class="fa-solid fa-arrow-right icon-arrow"></i>
+                                <div class="icon-block light">B</div>
+                            </div>
+                            <h3>Group Comparison</h3>
+                            <p>Compare two groups of documents.</p>
+                        </div>
+
+                        <div class="compare-card" onclick="showCompareView('crosscheck')">
+                            <div class="card-icon-area">
+                                <div class="icon-block">A</div>
+                                <i class="fa-solid fa-arrow-right-arrow-left icon-arrow"></i>
+                                <div class="icon-block light">B</div>
+                            </div>
+                            <h3>Crosscheck</h3>
+                            <p>Cross Compare Two files or groups of documents.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Group Comparison View (A -> B) -->
+                <div id="compare-group-view" style="display: none;">
+                    <button class="btn-text-back" onclick="showCompareSelection()">
+                        <i class="fa-solid fa-arrow-left"></i> Back to Selection
+                    </button>
+                    <h2 style="color: var(--white); font-size: 1.8rem; margin-bottom: 5px; margin-top: 15px;">Choose Multiple Items</h2>
+                    <p style="color: var(--text-muted); margin-bottom: 20px;">Compare Source A documents against Target B documents.</p>
+
+                    <div class="compare-split-layout">
+                        <!-- Source A -->
+                        <div class="compare-side">
+                            <div class="side-header">
+                                <span class="label-badge dark">A</span> Source
+                            </div>
+                            <textarea id="bulk-group-source" class="large-textarea" placeholder="Paste source text or logic here..."></textarea>
+                            <div class="action-row" id="group-source-doc-actions">
+                                <input type="file" id="bulk-group-source-file" style="display: none;" multiple onchange="handleBulkFileUpload(event, 'bulk-group-source')">
+                                <button type="button" class="btn-compare-light" onclick="document.getElementById('bulk-group-source-file').click()">Add Document</button>
+                                <button type="button" class="btn-compare-transparent" onclick="document.getElementById('bulk-group-source').value = ''">Remove All</button>
+                            </div>
+
+                        </div>
+
+                        <!-- Divider Arrow -->
+                        <div class="compare-divider-icon">
+                            <i class="fa-solid fa-arrow-right-arrow-left fa-rotate-90"></i>
+                        </div>
+
+                        <!-- Target B -->
+                        <div class="compare-side">
+                            <div class="side-header">
+                                <span class="label-badge light">B</span> Target
+                            </div>
+                            <textarea id="bulk-group-target" class="large-textarea" placeholder="Paste target text or logic here..."></textarea>
+                            <div class="action-row" id="group-target-doc-actions">
+                                <input type="file" id="bulk-group-target-file" style="display: none;" multiple onchange="handleBulkFileUpload(event, 'bulk-group-target')">
+                                <button type="button" class="btn-compare-light" onclick="document.getElementById('bulk-group-target-file').click()">Add Document</button>
+                                <button type="button" class="btn-compare-transparent" onclick="document.getElementById('bulk-group-target').value = ''">Remove All</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    
+                    <button id="btn-scan-group" class="btn-compare-scan" onclick="scanBulkComparison('group')">Scan Now</button>
+                </div>
+
+                <!-- Crosscheck View (A <-> B) -->
+                <div id="compare-crosscheck-view" style="display: none;">
+                    <button class="btn-text-back" onclick="showCompareSelection()">
+                        <i class="fa-solid fa-arrow-left"></i> Back to Selection
+                    </button>
+                    <h2 style="color: var(--white); font-size: 1.8rem; margin-bottom: 5px; margin-top: 15px;">Choose Multiple Items</h2>
+                    <p style="color: var(--text-muted); margin-bottom: 20px;">Crosscheck compares multiple documents against each other.</p>
+                    
+                    <textarea id="bulk-crosscheck-input" class="large-textarea full-width" placeholder="Paste multiple documents or logic chunks to crosscheck..."></textarea>
+                    
+                    <div class="action-row-left" id="crosscheck-doc-actions">
+                        <input type="file" id="bulk-crosscheck-file" style="display: none;" multiple onchange="handleBulkFileUpload(event, 'bulk-crosscheck-input', true)">
+                        <button type="button" class="btn-compare-light" onclick="document.getElementById('bulk-crosscheck-file').click()">Add Document</button>
+                        <button type="button" class="btn-compare-transparent" onclick="document.getElementById('bulk-crosscheck-input').value = ''">Remove All</button>
+                    </div>
+                    
+
+
+                    <button id="btn-scan-crosscheck" class="btn-compare-scan mt-20" onclick="scanBulkComparison('crosscheck')">Scan Now</button>
+                </div>
+
+                <!-- Bulk Results Display -->
+                <div id="bulk-results-area" class="bulk-results-container" style="display: none;">
+                    <div class="bulk-results-header">
+                        <h3><i class="fa-solid fa-square-poll-vertical"></i> Analysis Results</h3>
+                        <button class="btn-text btn-dismiss" onclick="document.getElementById('bulk-results-area').style.display = 'none'"><i class="fa-solid fa-xmark"></i> Dismiss</button>
+                    </div>
+                    
+                    <div class="bulk-results-grid">
+                        <div class="bulk-score-side">
+                            <div id="bulk-score-circle">
+                                <svg viewBox="0 0 36 36" class="circular-chart green" id="bulk-circular-chart">
+                                    <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                    <path class="circle" id="bulk-circle-path" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                    <text x="18" y="20.35" class="percentage" id="bulk-score-text">0%</text>
+                                </svg>
+                            </div>
+                            <p class="bulk-score-label">Match Quality</p>
+                        </div>
+                        <div class="bulk-explanation-side">
+                            <p id="bulk-explanation-text">Summary will appear here...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reading Level Checker Section -->
+            <section id="section-reading-level" class="dashboard-section" style="display: none;">
+                <h2 style="color: var(--white); font-size: 2rem; margin-bottom: 5px;">Reading Level Checker</h2>
+                <p style="color: var(--text-muted); margin-bottom: 30px;">Check readability score of your documents.</p>
+
+                <div class="reading-input-container">
+                    <p class="sample-tag">--- Sample Content ---</p>
+                    <textarea id="reading-text-input" class="large-textarea reading-area" placeholder="Paste content here...">Language is a structured system of communication that consists of grammar and vocabulary. It is the primary means by which humans convey meaning, both in spoken and signed forms, and may also be conveyed through writing. Human language is characterized by its cultural and historical diversity, with significant variations observed between cultures and across time.
+
+Human languages possess the properties of productivity and displacement, which enable the creation of an infinite number of sentences, and the ability to refer to objects, events, and ideas that are not immediately present in the discourse. The use of human language relies on social convention and is acquired through learning.
+
+Source: Wikipedia.com</textarea>
+                </div>
+
+                <div class="reading-actions-bar">
+                    <div class="left-actions">
+                        <input type="file" id="reading-level-file" style="display: none;" multiple onchange="handleBulkFileUpload(event, 'reading-text-input')">
+                        <button type="button" class="btn-compare-light" onclick="document.getElementById('reading-level-file').click()">Load Document</button>
+                        <button type="button" class="btn-compare-transparent" onclick="document.getElementById('reading-text-input').value = ''">Clear All</button>
+                    </div>
+                    <button class="btn-compare-scan small" onclick="calculateReadingLevel()">Calculate</button>
+                </div>
+
+                <!-- Reading Stats UI -->
+                <div class="reading-stats-wrapper">
+                    <div class="main-stats-grid">
+                        <div class="stat-big-block">
+                            <h3 id="stat-grade-level">-</h3>
+                            <p>Reading Level <i class="fa-regular fa-circle-question" style="color: var(--white);" title="Calculated using Flesch-Kincaid Grade Level formula."></i></p>
+                        </div>
+                        <div class="stat-big-block">
+                            <h3 id="stat-keywords">-</h3>
+                            <p>Keywords</p>
+                        </div>
+                        <div class="stat-big-block gauge-block">
+                            <div class="gauge-container">
+                                <svg viewBox="0 0 120 60" class="gauge-svg">
+                                    <defs>
+                                        <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stop-color="#27c93f" />
+                                            <stop offset="35%" stop-color="#a6e22e" />
+                                            <stop offset="55%" stop-color="#ffbd2e" />
+                                            <stop offset="75%" stop-color="#ff8a2e" />
+                                            <stop offset="100%" stop-color="#ff5f56" />
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M 15 60 A 45 45 0 0 1 105 60" fill="none" stroke="url(#gaugeGradient)" stroke-width="12" stroke-dasharray="14 3.67" stroke-linecap="butt" />
+                                </svg>
+                                <div class="gauge-needle" id="gauge-needle"></div>
+                                <div class="gauge-needle-base"></div>
+                            </div>
+                            <div class="gauge-text">
+                                <h3 id="stat-difficulty" style="margin-bottom: 0;">-</h3>
+                                <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem;">Difficulty Level</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sub-stats-grid">
+                        <div class="sub-stat">
+                            <h4 id="stat-words">-</h4>
+                            <p>Unique Words</p>
+                        </div>
+                        <div class="sub-stat">
+                            <h4 id="stat-chars">-</h4>
+                            <p>Characters</p>
+                        </div>
+                        <div class="sub-stat">
+                            <h4 id="stat-spaces">-</h4>
+                            <p>White Spaces</p>
+                        </div>
+                        <div class="sub-stat">
+                            <h4 id="stat-syllables">-</h4>
+                            <p>Syllables</p>
+                        </div>
+                        <div class="sub-stat">
+                            <h4 id="stat-sentences">-</h4>
+                            <p>Sentences</p>
+                        </div>
+                        <div class="sub-stat">
+                            <h4 id="stat-paragraphs">-</h4>
+                            <p>Paragraphs</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Research Paper Plagiarism Section -->
+            <section id="section-paper-plagiarism" class="dashboard-section" style="display: none;">
+                <h2 style="color: var(--white); font-size: 2rem; margin-bottom: 5px;">Research Paper Plagiarism</h2>
+                <p style="color: var(--text-muted); margin-bottom: 30px;">Cross-check academic papers and articles against extensive databases.</p>
+
+                <div class="upload-wrapper centered-wrapper">
+                    <div class="upload-card" style="margin: 0;">
+                        <h3><i class="fa-solid fa-file-signature"></i> Upload Document</h3>
+                        <p>Upload your research papers to check for plagiarism against academic databases and internet sources. Supported formats: .pdf, .docx, .txt</p>
+                        
+                        <div class="drop-zone" id="paper-drop-zone" style="margin-top: 20px;">
+                            <i class="fa-solid fa-file-pdf"></i>
+                            <h4 id="paper-drop-text">Select Document</h4>
+                            <p>or drag and drop here</p>
+                            <input type="file" id="paper-file-input" style="display: none;" accept=".txt,.pdf,.docx,.doc">
+                            <button class="btn-primary" style="margin-top: 15px;" onclick="document.getElementById('paper-file-input').click(); return false;">Browse Files</button>
+                        </div>
+                        <button class="btn-scan" id="paper-scan-btn" onclick="startPaperScan()" style="margin-top: 20px;">INITIALIZE SCAN <i class="fa-solid fa-bolt"></i></button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="section-settings" class="dashboard-section" style="display: none;">
+                <div class="settings-layout">
+                    <!-- Left Sidebar Configuration Menu -->
+                    <aside class="settings-sidebar text-sm">
+                        <h2 class="settings-sidebar-title text-xl mb-4 text-white"><i class="fa-solid fa-gear"></i> System Config</h2>
+                        
+                        <div class="settings-nav-group">
+                            <span class="nav-group-title">Personal</span>
+                            <ul class="settings-nav">
+                                <li class="settings-nav-item active" onclick="switchSettingsTab('set-account', this)"><i class="fa-solid fa-user-circle"></i> Account Settings</li>
+                                <li class="settings-nav-item" onclick="switchSettingsTab('set-security', this)"><i class="fa-solid fa-shield-halved"></i> Security & Privacy</li>
+                                <li class="settings-nav-item" onclick="switchSettingsTab('set-ui', this)"><i class="fa-solid fa-wand-magic-sparkles"></i> UI & Personalization</li>
+                            </ul>
+                        </div>
+
+                        <div class="settings-nav-group mt-4">
+                            <span class="nav-group-title">Engine</span>
+                            <ul class="settings-nav">
+                                <li class="settings-nav-item" onclick="switchSettingsTab('set-plagiarism', this)"><i class="fa-solid fa-magnifying-glass-chart"></i> Detection Rules</li>
+                                <li class="settings-nav-item" onclick="switchSettingsTab('set-ai', this)"><i class="fa-solid fa-robot"></i> Advanced AI Config</li>
+                                <li class="settings-nav-item" onclick="switchSettingsTab('set-performance', this)"><i class="fa-solid fa-gauge-high"></i> Performance</li>
+                            </ul>
+                        </div>
+
+                        <div class="settings-nav-group mt-4">
+                            <span class="nav-group-title">Output</span>
+                            <ul class="settings-nav">
+                                <li class="settings-nav-item" onclick="switchSettingsTab('set-reports', this)"><i class="fa-solid fa-file-pdf"></i> Report Formatting</li>
+                                <li class="settings-nav-item" onclick="switchSettingsTab('set-notifications', this)"><i class="fa-solid fa-bell"></i> Notifications</li>
+                                <li class="settings-nav-item" onclick="switchSettingsTab('set-storage', this)"><i class="fa-solid fa-hard-drive"></i> Storage & Files</li>
+                            </ul>
+                        </div>
+
+                        <div class="settings-nav-group mt-4">
+                            <span class="nav-group-title">Workspace</span>
+                            <ul class="settings-nav">
+                                <li class="settings-nav-item" onclick="switchSettingsTab('set-team', this)"><i class="fa-solid fa-users"></i> Team Collaboration</li>
+                                <li class="settings-nav-item" onclick="switchSettingsTab('set-integrations', this)"><i class="fa-solid fa-puzzle-piece"></i> Integrations & API</li>
+                            </ul>
+                        </div>
+
+                        <div class="settings-nav-group mt-4">
+                            <span class="nav-group-title">System</span>
+                            <ul class="settings-nav">
+                                <li class="settings-nav-item" onclick="switchSettingsTab('set-legal', this)"><i class="fa-solid fa-scale-balanced"></i> Legal & Compliance</li>
+                                <li class="settings-nav-item" onclick="switchSettingsTab('set-backup', this)"><i class="fa-solid fa-cloud-arrow-down"></i> Backup & Recovery</li>
+                                <li class="settings-nav-item" onclick="switchSettingsTab('set-support', this)"><i class="fa-solid fa-life-ring"></i> Help & Support</li>
+                            </ul>
+                        </div>
+                    </aside>
+
+                    <!-- Right Main Content Panels -->
+                    <div class="settings-content-area" style="flex: 1; min-width: 0;">
+                        <!-- 1. Account Settings -->
+                        <div id="set-account" class="settings-pane active">
+                            <h3><i class="fa-solid fa-user-circle"></i> Account Settings</h3>
+                            <p class="settings-subtitle">Manage your profile and authentication methods.</p>
+                            
+                            <div class="setting-group-card">
+                                <h4>Profile Information</h4>
+                                <div class="setting-item flex-between" style="align-items: flex-end; gap: 10px;">
+                                    <div style="flex: 1;">
+                                        <label>Display Name</label>
+                                        <input type="text" class="settings-input" id="setting-display-name" placeholder="Loading Name...">
+                                    </div>
+                                    <button class="btn-compare-light text-sm" onclick="updateDisplayName()" style="margin-bottom: 2px;">Update Name</button>
+                                </div>
+                                <div class="setting-item mt-4">
+                                    <label>Email Address</label>
+                                    <input type="email" class="settings-input" id="setting-email" placeholder="Loading..." disabled style="background: rgba(255,255,255,0.05); cursor: not-allowed;">
+                                    <span class="text-sm text-muted mt-2 block">To change your email, please contact support.</span>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-group-card danger">
+                                <h4 class="text-red"><i class="fa-solid fa-triangle-exclamation"></i> Danger Zone</h4>
+                                <div class="setting-item flex-between">
+                                    <div>
+                                        <label>Sign Out</label>
+                                        <span class="text-muted text-sm">Log out of this browser.</span>
+                                    </div>
+                                    <button class="btn-action delete" id="setting-logout-btn" onclick="handleLogout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Security & Privacy -->
+                        <div id="set-security" class="settings-pane" style="display: none;">
+                            <h3><i class="fa-solid fa-shield-halved"></i> Security & Privacy</h3>
+                            <p class="settings-subtitle">Manage 2FA, API keys, and Data Retention.</p>
+                            
+                            <div class="setting-group-card">
+                                <div class="setting-item flex-between">
+                                    <div>
+                                        <label>Two-Factor Authentication (2FA)</label>
+                                        <span class="text-muted text-sm">Require code from Authenticator app.</span>
+                                    </div>
+                                    <button class="btn-compare-light text-sm" onclick="alert('Multi-factor authentication will be configured via Firebase shortly.')">Enable 2FA</button>
+                                </div>
+                                <div class="setting-item flex-between mt-4">
+                                    <div>
+                                        <label>Active Sessions</label>
+                                        <span class="text-muted text-sm">Review devices logged into your account.</span>
+                                    </div>
+                                    <button class="btn-compare-light text-sm" onclick="alert('You are currently only logged in on this browser instance.')">View Devices</button>
+                                </div>
+                            </div>
+
+                            <div class="setting-group-card">
+                                <h4>Data Retention & GDPR</h4>
+                                <div class="setting-item flex-between">
+                                    <div>
+                                        <label>Auto-delete uploaded documents</label>
+                                        <span class="text-muted text-sm">Automatically purges your uploads after scanning.</span>
+                                    </div>
+                                    <label class="switch"><input type="checkbox" id="setting-auto-delete" onchange="saveSetting('autoDelete', this.checked)"><span class="slider round"></span></label>
+                                </div>
+                                <div class="setting-item mt-4">
+                                    <label>Retention Duration</label>
+                                    <select class="settings-input" id="setting-retention" onchange="saveSetting('retention', this.value)">
+                                        <option value="0">Delete Immediately (0 days)</option>
+                                        <option value="30" selected>30 days</option>
+                                        <option value="90">90 days</option>
+                                        <option value="inf">Indefinitely</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Plagiarism Detection Rules -->
+                        <div id="set-plagiarism" class="settings-pane" style="display: none;">
+                            <h3><i class="fa-solid fa-magnifying-glass-chart"></i> Detection Rules</h3>
+                            <p class="settings-subtitle">Configure the strictness and behavior of the scan engine.</p>
+                            
+                            <div class="setting-group-card">
+                                <h4>Engine Preference</h4>
+                                <div class="setting-item">
+                                    <label>Default Analysis Engine Model</label>
+                                    <select id="setting-model-select" class="settings-input" onchange="localStorage.setItem('preferredModel', this.value)">
+                                        <option value="models/gemini-2.5-flash">Gemini 2.5 Flash (Fastest - Default)</option>
+                                        <option value="models/gemini-2.5-pro">Gemini 2.5 Pro (Most Accurate)</option>
+                                        <option value="models/gemini-1.5-flash-8b">Gemini 1.5 Flash-8B (Lightweight)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="setting-group-card">
+                                <h4>Matching Rules</h4>
+                                <div class="setting-item flex-between">
+                                    <div>
+                                        <label>Exclude Quotes & References</label>
+                                        <span class="text-muted text-sm">Ignore properly cited text blocks.</span>
+                                    </div>
+                                    <label class="switch"><input type="checkbox" id="setting-exclude-quotes" checked onchange="saveSetting('excludeQuotes', this.checked)"><span class="slider round"></span></label>
+                                </div>
+                                <div class="setting-item flex-between mt-4">
+                                    <div>
+                                        <label>Ignore Small Matches (Threshold %)</label>
+                                        <span class="text-muted text-sm">Ignores matches smaller than this size.</span>
+                                    </div>
+                                    <input type="range" id="setting-match-threshold" min="0" max="25" value="5" style="width: 150px;" onchange="saveSetting('matchThreshold', this.value)">
+                                </div>
+                                <div class="setting-item mt-4">
+                                    <label>Exclude Specific Domains</label>
+                                    <input type="text" id="setting-ignore-domains" class="settings-input" placeholder="e.g. stackoverflow.com, github.com" onchange="saveSetting('ignoreDomains', this.value)">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. UI & Personalization -->
+                        <div id="set-ui" class="settings-pane" style="display: none;">
+                            <h3><i class="fa-solid fa-wand-magic-sparkles"></i> UI & Personalization</h3>
+                            
+                            <div class="setting-group-card">
+                                <div class="setting-item flex-between">
+                                    <div>
+                                        <label>Dark / Light Theme</label>
+                                    </div>
+                                    <select class="settings-input" style="width: 150px;" id="setting-theme" onchange="toggleThemeGlobal(this.value); saveSetting('theme', this.value)">
+                                        <option value="dark">Dark Mode</option>
+                                        <option value="light">Light Mode</option>
+                                    </select>
+                                </div>
+                                <div class="setting-item flex-between mt-4">
+                                    <div>
+                                        <label>Font Size</label>
+                                    </div>
+                                    <select class="settings-input" style="width: 150px;" id="setting-font-size" onchange="changeFontSize(this.value)">
+                                        <option value="14px">Small</option>
+                                        <option value="16px" selected>Medium (Default)</option>
+                                        <option value="18px">Large</option>
+                                    </select>
+                                </div>
+                                <div class="setting-item flex-between mt-4">
+                                    <div>
+                                        <label>Accent Color</label>
+                                        <span class="text-muted text-sm block">Change the primary interface hue.</span>
+                                    </div>
+                                    <div style="display: flex; gap: 10px;">
+                                        <button onclick="changeAccentColor('#00f0ff')" style="width:24px; height:24px; border-radius:50%; background:#00f0ff; border:none; cursor:pointer;" title="Cyan (Default)"></button>
+                                        <button onclick="changeAccentColor('#bd93f9')" style="width:24px; height:24px; border-radius:50%; background:#bd93f9; border:none; cursor:pointer;" title="Purple"></button>
+                                        <button onclick="changeAccentColor('#50fa7b')" style="width:24px; height:24px; border-radius:50%; background:#50fa7b; border:none; cursor:pointer;" title="Green"></button>
+                                        <button onclick="changeAccentColor('#ff79c6')" style="width:24px; height:24px; border-radius:50%; background:#ff79c6; border:none; cursor:pointer;" title="Pink"></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 5. Advanced AI & Rules -->
+                        <div id="set-ai" class="settings-pane" style="display: none;">
+                            <h3><i class="fa-solid fa-robot"></i> Advanced AI Config</h3>
+                            <div class="setting-group-card">
+                                <div class="setting-item flex-between">
+                                    <div>
+                                        <label>AI Detection Sensitivity</label>
+                                        <span class="text-muted text-sm">Strictness of AI-generated content flagging.</span>
+                                    </div>
+                                    <select class="settings-input" id="setting-ai-sensitivity" style="width: 150px;" onchange="saveSetting('aiSensitivity', this.value)">
+                                        <option value="low">Low</option>
+                                        <option value="balanced" selected>Balanced</option>
+                                        <option value="high">Aggressive</option>
+                                    </select>
+                                </div>
+                                <div class="setting-item mt-4">
+                                    <label>Semantic Similarity Strictness</label>
+                                    <input type="range" id="setting-semantic-strictness" min="0" max="100" value="70" style="width: 100%;" onchange="saveSetting('semanticStrictness', this.value)">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 6. Notifications -->
+                        <div id="set-notifications" class="settings-pane" style="display: none;">
+                            <h3><i class="fa-solid fa-bell"></i> Notifications</h3>
+                            <div class="setting-group-card">
+                                <div class="setting-item flex-between">
+                                    <div>
+                                        <label>Email Notifications</label>
+                                        <span class="text-muted text-sm">Summary email when scans finish.</span>
+                                    </div>
+                                    <label class="switch"><input type="checkbox" id="setting-notifications-email" onchange="saveSetting('emailNotifs', this.checked)"><span class="slider round"></span></label>
+                                </div>
+                                <div class="setting-item flex-between mt-4">
+                                    <div>
+                                        <label>Weekly Usage Summary</label>
+                                    </div>
+                                    <label class="switch"><input type="checkbox" id="setting-notifications-weekly" onchange="saveSetting('weeklyStats', this.checked)"><span class="slider round"></span></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 7. Report Formatting -->
+                        <div id="set-reports" class="settings-pane" style="display: none;">
+                            <h3><i class="fa-solid fa-file-pdf"></i> Report Formatting</h3>
+                            <div class="setting-group-card">
+                                <div class="setting-item">
+                                    <label>Preferred Export Format</label>
+                                    <select id="setting-export-select" class="settings-input" onchange="localStorage.setItem('preferredExport', this.value)">
+                                        <option value="pdf">Classic PDF (Recommended)</option>
+                                        <option value="json">Raw JSON Data</option>
+                                        <option value="csv">CSV Spreadsheet</option>
+                                    </select>
+                                </div>
+                                <div class="setting-item flex-between mt-4">
+                                    <div>
+                                        <label>Auto-Generate Reports</label>
+                                        <span class="text-muted text-sm">Create and save document after every scan.</span>
+                                    </div>
+                                    <label class="switch"><input type="checkbox" id="setting-auto-report" onchange="saveSetting('autoReport', this.checked)"><span class="slider round"></span></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 8. Performance -->
+                        <div id="set-performance" class="settings-pane" style="display: none;">
+                            <h3><i class="fa-solid fa-gauge-high"></i> Performance Settings</h3>
+                            <div class="setting-group-card">
+                                <div class="setting-item flex-between">
+                                    <div>
+                                        <label>Scan Priority</label>
+                                    </div>
+                                    <select class="settings-input" id="setting-scan-priority" style="width: 200px;" onchange="saveSetting('scanPriority', this.value)">
+                                        <option value="fast">Fast (Surface Level)</option>
+                                        <option value="balanced" selected>Balanced</option>
+                                        <option value="deep">Deep Scan (Slower)</option>
+                                    </select>
+                                </div>
+                                <div class="setting-item flex-between mt-4">
+                                    <div>
+                                        <label>Background Processing</label>
+                                    </div>
+                                    <label class="switch"><input type="checkbox" id="setting-background-process" checked onchange="saveSetting('bgProcess', this.checked)"><span class="slider round"></span></label>
+                                </div>
+                                <div class="setting-item flex-between mt-4">
+                                    <div>
+                                        <label>Allow Anonymous Telemetry</label>
+                                    </div>
+                                    <label class="switch"><input type="checkbox" id="setting-telemetry" checked onchange="saveSetting('telemetry', this.checked)"><span class="slider round"></span></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 9. Storage & Files -->
+                        <div id="set-storage" class="settings-pane" style="display: none;">
+                            <h3><i class="fa-solid fa-hard-drive"></i> Storage Management</h3>
+                            <div class="setting-group-card">
+                                <h4>Browser Storage Quota</h4>
+                                <div class="progress-bar-bg" style="height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden; margin-bottom: 5px;">
+                                    <div id="storage-progress-bar" style="width: 0%; background: #64ffda; height: 100%;"></div>
+                                </div>
+                                <span class="text-sm text-muted" id="storage-quota-text">Calculating...</span>
+                                
+                                <div class="setting-item flex-between mt-4 pt-4 border-top" style="border-top: 1px solid rgba(255,255,255,0.05);">
+                                    <div>
+                                        <label>Clear Local Scan History</label>
+                                        <span class="text-muted text-sm block">Permanently deletes all saved scans from this browser.</span>
+                                    </div>
+                                    <button class="btn-action delete text-sm" onclick="clearEntireHistory()">Clear Data</button>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- 11. Team Collaboration -->
+                        <div id="set-team" class="settings-pane" style="display: none;">
+                            <h3><i class="fa-solid fa-users"></i> Team & Collaboration</h3>
+                            <div class="setting-group-card">
+                                <div class="flex-between mb-4">
+                                    <h4>Team Members</h4>
+                                    <div style="display: flex; gap: 8px;">
+                                        <input type="email" id="team-invite-email" class="settings-input" placeholder="colleague@company.com" style="width: 200px; padding: 4px 10px;">
+                                        <button class="btn-compare-light text-sm" onclick="inviteTeamMember()">Invite</button>
+                                    </div>
+                                </div>
+                                <ul id="team-member-list" style="list-style: none; padding: 0;">
+                                    <!-- Populated by script or default admin -->
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 12. Integrations -->
+                        <div id="set-integrations" class="settings-pane" style="display: none;">
+                            <h3><i class="fa-solid fa-puzzle-piece"></i> Integrations & API</h3>
+                            <div class="setting-group-card">
+                                <h4>API Access Key</h4>
+                                <p class="text-muted text-sm mb-2">Use this key to authenticate requests to the CodeGuard public API.</p>
+                                <div class="setting-item flex-between" style="gap: 10px; margin-bottom: 15px;">
+                                    <input type="text" id="setting-api-key" class="settings-input" placeholder="You haven't generated a key yet..." disabled style="background: rgba(255,255,255,0.05); color: #00f0ff; letter-spacing: 1px; font-family: monospace;">
+                                    <button class="btn-compare-light text-sm" onclick="copyApiKey()" title="Copy to clipboard"><i class="fa-solid fa-copy"></i></button>
+                                </div>
+                                <button id="btn-generate-api" class="btn-compare-transparent text-sm mb-4" onclick="generateApiKey()">Generate New API Key</button>
+                                
+                                <h4 class="mt-4">LMS Syncing</h4>
+                                <div class="setting-item flex-between">
+                                    <span><i class="fa-brands fa-google"></i> Google Classroom</span>
+                                    <button id="lms-google-btn" class="btn-primary text-sm" onclick="toggleIntegration('lms-google-btn', 'Google Classroom')">Connect</button>
+                                </div>
+                                <div class="setting-item flex-between mt-2">
+                                    <span><i class="fa-solid fa-graduation-cap"></i> Moodle Server</span>
+                                    <button id="lms-moodle-btn" class="btn-primary text-sm" onclick="toggleIntegration('lms-moodle-btn', 'Moodle Server')">Connect</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 13. Legal -->
+                        <div id="set-legal" class="settings-pane" style="display: none;">
+                            <h3><i class="fa-solid fa-scale-balanced"></i> Legal & Compliance</h3>
+                            <div class="setting-group-card">
+                                <ul style="list-style: none; padding: 0; line-height: 2.5;">
+                                    <li><a href="privacy.html" class="text-blue">Terms & Conditions <i class="fa-solid fa-external-link text-xs"></i></a></li>
+                                    <li><a href="privacy.html" class="text-blue">Privacy Policy <i class="fa-solid fa-external-link text-xs"></i></a></li>
+                                    <li><a href="privacy.html" class="text-blue">Data Processing Agreement (DPA) <i class="fa-solid fa-external-link text-xs"></i></a></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 14. Backup -->
+                        <div id="set-backup" class="settings-pane" style="display: none;">
+                            <h3><i class="fa-solid fa-cloud-arrow-down"></i> Backup & Recovery</h3>
+                            <div class="setting-group-card">
+                                <div class="setting-item flex-between">
+                                    <div>
+                                        <label>Export User Data</label>
+                                        <span class="text-muted text-sm block">Download a JSON backup of all your local scans.</span>
+                                    </div>
+                                    <button class="btn-compare-light text-sm" onclick="exportDataBackup()">Download Backup</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="set-support" class="settings-pane" style="display: none;">
+                            <h2 style="color: var(--white); font-size: 1.6rem; margin-bottom: 25px;"><i class="fa-solid fa-life-ring"></i> Help & Support</h2>
+                            
+                            <div class="setting-group-card" style="margin-bottom: 30px;">
+                                <h4 style="color: var(--primary); margin-bottom: 15px;">Fast Support</h4>
+                                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Need technical help? Our team usually responds within 24 hours.</p>
+                                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                                    <button class="btn-primary" style="flex: 1; min-width: 200px;" onclick="window.location.href='mailto:support@codeguard.ai'"><i class="fa-solid fa-envelope"></i> Open Support Ticket</button>
+                                    <button class="btn-compare-light" style="flex: 1; min-width: 200px;" onclick="window.location.href='#'"><i class="fa-solid fa-book"></i> View Documentation</button>
+                                </div>
+                            </div>
+
+                            <div class="setting-group-card">
+                                <h4 style="color: var(--white); margin-bottom: 20px;">Frequently Asked Questions</h4>
+                                
+                                <div style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; margin-bottom: 15px;">
+                                    <h5 style="color: var(--primary); font-size: 0.95rem; margin-bottom: 8px;">How accurate is the AI detection?</h5>
+                                    <p style="color: var(--text-muted); font-size: 0.85rem;">CodeGuard uses advanced fingerprinting and LLM analysis. Our accuracy rate is over 94% on common programming languages.</p>
+                                </div>
+
+                                <div style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; margin-bottom: 15px;">
+                                    <h5 style="color: var(--primary); font-size: 0.95rem; margin-bottom: 8px;">Is my code stored on your servers?</h5>
+                                    <p style="color: var(--text-muted); font-size: 0.85rem;">We prioritize privacy. By default, scans are processed locally or via secure API calls and results are stored in your browser's LocalStorage.</p>
+                                </div>
+
+                                <div>
+                                    <h5 style="color: var(--primary); font-size: 0.95rem; margin-bottom: 8px;">How do I export results to PDF?</h5>
+                                    <p style="color: var(--text-muted); font-size: 0.85rem;">Click 'View Report' in your history, then use the 'Download PDF' button at the top of the report page.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+    <script type="module" src="script.js?v=18"></script>
+</body>
+
+</html>

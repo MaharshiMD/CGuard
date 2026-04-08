@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Console | CodeGuard AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css?v=5">
+</head>
+<body>
+
+    <div class="dashboard-container">
+        
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-shield-halved"></i> <span>CodeGuard</span>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="active"><a href="#"><i class="fa-solid fa-radar"></i> New Scan</a></li>
+                <li><a href="#"><i class="fa-solid fa-clock-rotate-left"></i> History</a></li>
+                <li><a href="#"><i class="fa-brands fa-github"></i> Repositories</a></li>
+                <li><a href="#"><i class="fa-solid fa-chart-pie"></i> Reports</a></li>
+                <li><a href="#"><i class="fa-solid fa-sliders"></i> Settings</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <a href="index.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            
+            <header class="top-bar">
+                <h2>Forensic Analysis Console</h2>
+                <div class="user-profile">
+                    <span class="status-dot"></span>
+                    <span>Admin</span>
+                    <img src="https://i.pravatar.cc/100?img=33" alt="User">
+                </div>
+            </header>
+
+            <div class="upload-wrapper">
+                <div class="upload-card">
+                    <h3><i class="fa-solid fa-cloud-arrow-up"></i> Upload Source Code</h3>
+                    <p>Supported formats: .zip, .py, .java, .cpp, .js</p>
+                    
+                    <div class="drop-zone">
+                        <i class="fa-solid fa-folder-open"></i>
+                        <h4>Drag & Drop files here</h4>
+                        <p>or</p>
+                        <button class="btn-primary">Browse Files</button>
+                    </div>
+
+                    <div class="scan-options">
+                        <label>
+                            <input type="checkbox" checked> Check Logic Similarity (AST)
+                        </label>
+                        <label>
+                            <input type="checkbox" checked> Detect AI Generation
+                        </label>
+                    </div>
+
+                    <button class="btn-scan">INITIALIZE SCAN <i class="fa-solid fa-bolt"></i></button>
+                </div>
+
+                <div class="terminal-log">
+                    <div class="terminal-header">
+                        <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+                        <span>system_log --monitor</span>
+                    </div>
+                    <div class="terminal-body">
+                        <p>> System ready...</p>
+                        <p>> Waiting for input stream...</p>
+                        <p class="blink">_</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="recent-scans">
+                <h3>Recent Activity</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>File Name</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Similarity</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><i class="fa-brands fa-python"></i> student_algo_v2.py</td>
+                            <td>10 mins ago</td>
+                            <td><span class="tag success">Complete</span></td>
+                            <td class="risk-low">2%</td>
+                            <td><button type="button" class="btn-icon" title="View details"><i class="fa-solid fa-eye"></i></button></td>
+                        </tr>
+                        <tr>
+                            <td><i class="fa-brands fa-java"></i> user_profile.java</td>
+                            <td>2 hours ago</td>
+                            <td><span class="tag danger">Flagged</span></td>
+                            <td class="risk-high">89%</td>
+                            <td><button type="button" class="btn-icon" title="Download PDF"><i class="fa-solid fa-file-pdf"></i></button></td>
+                        </tr>
+                        <tr>
+                            <td><i class="fa-brands fa-js"></i> react_component.js</td>
+                            <td>Yesterday</td>
+                            <td><span class="tag warning">AI Detected</span></td>
+                            <td class="risk-mid">45%</td>
+                            <td><button type="button" class="btn-icon" title="View details"><i class="fa-solid fa-eye"></i></button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </main>
+    </div>
+
+</body>
+</html>

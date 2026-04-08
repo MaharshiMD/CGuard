@@ -1,0 +1,17 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Match the 'scans' collection
+    match /scans/{scanId} {
+      
+      // 1. READ: Allow users to see ONLY their own scans
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      
+      // 2. WRITE: Block all client-side writes. 
+      // Only the "Admin SDK" (your Cloud Function) can bypass this to save results.
+      allow write: if false; 
+    }
+  }
+}

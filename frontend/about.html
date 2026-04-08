@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us | CodeGuard AI</title>
+    <meta name="theme-color" content="#0a192f">
+    <link rel="manifest" href="manifest.json">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css?v=5">
+    <style>
+        .page-content {
+            padding: 80px 20px;
+            color: var(--text-color, #e2e8f0);
+            max-width: 900px;
+            margin: auto;
+            line-height: 1.8;
+        }
+
+        .page-content h2 {
+            color: var(--highlight-color, #00f0ff);
+            margin: 40px 0 20px;
+            font-size: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
+        }
+
+        .page-content p {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <a href="index.html" style="text-decoration:none; color:inherit;"><i
+                        class="fa-solid fa-shield-halved"></i> CodeGuard<span>.AI</span></a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html#features">Features</a></li>
+                <li><a href="index.html#technology">Engine</a></li>
+                <li>
+                    <button id="theme-toggle" class="theme-toggle-btn" title="Toggle Light Mode"
+                        style="margin-right: 15px;">
+                        <i class="fa-solid fa-sun"></i>
+                    </button>
+                </li>
+                <li><a href="login.html" class="btn-login">Login</a></li>
+                <li><a href="signup.html" class="btn-primary">Get Started</a></li>
+            </ul>
+            <div class="hamburger">
+                <i class="fa-solid fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="container" style="text-align: center;">
+            <h1>Our <span class="highlight">Story</span></h1>
+            <p>Securing the world's codebase through advanced AST analysis.</p>
+        </div>
+    </header>
+
+    <section class="page-content">
+        <h2>Our Mission</h2>
+        <p>At CodeGuard AI, we believe in the integrity of software development. As the software landscape evolves with
+            the advent of AI coding assistants and global code-sharing, traditional text-matching approaches to
+            plagiarism detection have become obsolete.</p>
+        <p>Our mission is to provide an airtight, logic-based detection system that protects intellectual property,
+            maintains academic integrity, and empowers organizations to verify the authenticity of their codebase.</p>
+
+        <h2>Why We Built This</h2>
+        <p>We noticed a critical gap in the market. Existing solutions like Turnitin, MOSS, and JPlag were either
+            outdated, slow, or easily circumvented by basic variable renaming or AI generation. We set out to build a
+            platform that understands code the way compilers do—through Abstract Syntax Trees (ASTs)—and applies deep
+            learning to identify logic similarity regardless of the programming language or structural obfuscation.</p>
+        <p>Whether a student translates a Python script to Java or a bad actor steals proprietary algorithms and
+            scrambles the variables, CodeGuard AI finds the logical fingerprint to uncover the truth.</p>
+
+        <h2>Our Team</h2>
+        <p>Built by a diverse team of software engineers, security researchers, and machine learning experts, CodeGuard
+            AI represents the cutting edge of forensic code analysis. We are passionate about empowering educators,
+            corporate security teams, and developers with the tools they need to ensure code integrity.</p>
+        <p style="margin-top: 15px; font-size: 1.15rem;">
+            <strong>Core Team:</strong> <span style="color: var(--highlight-color, #00f0ff);">Maharshi Dihora, Priyam Kakadiya, Jal Gadhiya</span>
+        </p>
+    </section>
+
+    <footer>
+        <div class="container footer-content">
+            <div class="footer-col">
+                <h3>CodeGuard.AI</h3>
+                <p>Advanced plagiarism detection for the modern software ecosystem.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Platform</h4>
+                <a href="https://codeguard-7e692.web.app/signup.html">Logic Checker</a>
+                <a href="https://codeguard-7e692.web.app/signup.html">AI Detector</a>
+                <a href="api.html">API Access</a>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <a href="about.html">About Us</a>
+                <a href="careers.html">Careers</a>
+                <a href="privacy.html">Privacy Policy</a>
+            </div>
+            <div class="footer-col">
+                <h4>Connect</h4>
+                <div class="socials">
+                    <a href="https://x.com/mvd6408?s=21" target="_blank"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="https://github.com/MaharshiMD" target="_blank"><i class="fa-brands fa-github"></i></a>
+                    <a href="https://www.linkedin.com/in/maharshi-dihora" target="_blank"><i
+                            class="fa-brands fa-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 CodeGuard AI. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script type="module" src="script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,91 @@
+[debug] [2026-03-10T05:43:17.884Z] ----------------------------------------------------------------------
+[debug] [2026-03-10T05:43:17.887Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Mahar\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js functions:shell
+[debug] [2026-03-10T05:43:17.888Z] CLI Version:   15.8.0
+[debug] [2026-03-10T05:43:17.888Z] Platform:      win32
+[debug] [2026-03-10T05:43:17.888Z] Node Version:  v25.4.0
+[debug] [2026-03-10T05:43:17.888Z] Time:          Tue Mar 10 2026 11:13:17 GMT+0530 (India Standard Time)
+[debug] [2026-03-10T05:43:17.888Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-03-10T05:43:17.890Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2026-03-10T05:43:24.419Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-03-10T05:43:24.419Z] > authorizing via signed-in user (maharshidihora@gmail.com)
+[debug] [2026-03-10T05:43:24.419Z] [iam] checking project codeguard-7e692 for permissions ["firebase.projects.get"]
+[debug] [2026-03-10T05:43:24.420Z] Checked if tokens are valid: false, expires at: 1773072895624
+[debug] [2026-03-10T05:43:24.420Z] Checked if tokens are valid: false, expires at: 1773072895624
+[debug] [2026-03-10T05:43:24.421Z] > refreshing access token with scopes: []
+[debug] [2026-03-10T05:43:24.422Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-03-10T05:43:24.422Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-03-10T05:43:26.726Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-03-10T05:43:26.726Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-03-10T05:43:26.745Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/codeguard-7e692:testIamPermissions [none]
+[debug] [2026-03-10T05:43:26.745Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/codeguard-7e692:testIamPermissions  x-goog-user-project=codeguard-7e692
+[debug] [2026-03-10T05:43:26.745Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/codeguard-7e692:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2026-03-10T05:43:26.979Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2026-03-10T05:43:26.979Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[debug] [2026-03-10T05:43:29.309Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/codeguard-7e692:testIamPermissions 200
+[debug] [2026-03-10T05:43:29.309Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/codeguard-7e692:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2026-03-10T05:43:29.345Z] [functions] Functions Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-03-10T05:43:29.773Z] defaultcredentials: writing to file C:\Users\Mahar\AppData\Roaming\firebase\maharshidihora_gmail_com_application_default_credentials.json
+[debug] [2026-03-10T05:43:29.779Z] DEBUG: Setting GAC to C:\Users\Mahar\AppData\Roaming\firebase\maharshidihora_gmail_com_application_default_credentials.json
+[debug] [2026-03-10T05:43:29.779Z] Checked if tokens are valid: true, expires at: 1773125005727
+[debug] [2026-03-10T05:43:29.779Z] Checked if tokens are valid: true, expires at: 1773125005727
+[debug] [2026-03-10T05:43:29.780Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/codeguard-7e692/adminSdkConfig [none]
+[debug] [2026-03-10T05:43:31.995Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/codeguard-7e692/adminSdkConfig 200
+[debug] [2026-03-10T05:43:31.995Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/codeguard-7e692/adminSdkConfig {"projectId":"codeguard-7e692","storageBucket":"codeguard-7e692.firebasestorage.app"}
+[debug] [2026-03-10T05:43:32.033Z] [functions] Watching "d:\College\Semester 6\Project\codeguard-app\backend" for Cloud Functions...
+[debug] [2026-03-10T05:43:32.040Z] Validating nodejs source
+[debug] [2026-03-10T05:43:42.088Z] checkFunctionsSDKVersion was unable to fetch information from NPM Error: spawnSync C:\WINDOWS\system32\cmd.exe ETIMEDOUT
+    at Object.spawnSync (node:internal/child_process:1103:20)
+    at Object.spawnSync (node:child_process:911:24)
+    at spawn.spawnSync [as sync] (C:\Users\Mahar\AppData\Roaming\npm\node_modules\firebase-tools\node_modules\cross-spawn\index.js:26:23)
+    at Object.getLatestSDKVersion (C:\Users\Mahar\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\functions\runtimes\node\versioning.js:55:25)
+    at Object.checkFunctionsSDKVersion (C:\Users\Mahar\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\functions\runtimes\node\versioning.js:74:32)
+    at Delegate.validate (C:\Users\Mahar\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\functions\runtimes\node\index.js:88:20)
+    at FunctionsEmulator.discoverTriggers (C:\Users\Mahar\AppData\Roaming\npm\node_modules\firebase-tools\lib\emulator\functionsEmulator.js:321:35)
+    at async FunctionsEmulator.loadTriggers (C:\Users\Mahar\AppData\Roaming\npm\node_modules\firebase-tools\lib\emulator\functionsEmulator.js:367:34)
+    at async FunctionsEmulator.connect (C:\Users\Mahar\AppData\Roaming\npm\node_modules\firebase-tools\lib\emulator\functionsEmulator.js:283:13)
+    at async FunctionsServer.connect (C:\Users\Mahar\AppData\Roaming\npm\node_modules\firebase-tools\lib\serve\functions.js:65:9)
+[debug] [2026-03-10T05:43:42.091Z] > [functions] package.json contents: {
+  "name": "functions",
+  "description": "Cloud Functions for CodeGuard AI",
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "18"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "firebase-admin": "^11.8.0",
+    "firebase-functions": "^4.4.0",
+    "@google/generative-ai": "^0.1.3",
+    "cors": "^2.8.5"
+  },
+  "private": true
+}
+[debug] [2026-03-10T05:43:42.091Z] Building nodejs source
+[debug] [2026-03-10T05:43:42.092Z] Failed to find version of module node: reached end of search path d:\College\Semester 6\Project\codeguard-app\backend\node_modules
+[warn] !  functions: Your requested "node" version "18" doesn't match your global version "25". Using node@25 from host. 
+[info] i  functions: Loaded environment variables from .env. 
+[info] i  functions: You are using a version of firebase-functions SDK (4.9.0) that does not have support for the newest Firebase Extensions features. Please update firebase-functions SDK to >=5.1.0 to use them correctly 
+[debug] [2026-03-10T05:43:42.117Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-03-10T05:43:42.156Z] Found firebase-functions binary at 'd:\College\Semester 6\Project\codeguard-app\backend\node_modules\.bin\firebase-functions'
+[info] Serving at port 8667
+
+[debug] [2026-03-10T05:43:43.748Z] Got response from /__/functions.yaml {"endpoints":{"analyzeCode":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"callableTrigger":{},"entryPoint":"analyzeCode"}},"specVersion":"v1alpha1","requiredAPIs":[]}
+[debug] [2026-03-10T05:43:47.815Z] [functions] Loaded functions definitions from source: analyzeCode.
+[debug] [2026-03-10T05:43:47.843Z] [functions[us-central1-analyzeCode]] http function initialized (http://127.0.0.1:5000/codeguard-7e692/us-central1/analyzeCode).
+[info] i  functions: Loaded functions: analyzeCode 
+[warn] !  functions: The following emulators are not running, calls to these services will affect production: firestore, database, pubsub, storage, eventarc, tasks 
+[debug] [2026-03-10T05:47:15.280Z] Functions emulator received unknown request at path /
+[debug] [2026-03-10T05:47:15.439Z] Functions emulator received unknown request at path /favicon.ico
+[debug] [2026-03-10T05:58:34.176Z] Functions emulator received unknown request at path /
+[debug] [2026-03-10T05:58:34.380Z] Functions emulator received unknown request at path /favicon.ico
+[debug] [2026-03-10T05:58:57.882Z] Functions emulator received unknown request at path /api/users
+[debug] [2026-03-10T05:59:54.410Z] Functions emulator received unknown request at path /index.html
+[debug] [2026-03-10T06:01:25.681Z] Functions emulator received unknown request at path /index.html
+[debug] [2026-03-10T06:03:53.977Z] Functions emulator received unknown request at path /

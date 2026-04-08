@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation | CodeGuard AI</title>
+    <meta name="theme-color" content="#0a192f">
+    <link rel="manifest" href="manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css?v=5">
+    <style>
+        .page-content { padding: 60px 20px 80px; color: var(--text-color, #e2e8f0); max-width: 900px; margin: auto; line-height: 1.8; }
+        .page-content h2 { color: var(--highlight-color, #00f0ff); margin: 40px 0 20px; font-size: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        .page-content h3 { color: #fff; margin: 30px 0 15px; font-size: 1.4rem; }
+        .page-content p { margin-bottom: 20px; font-size: 1.1rem; }
+        .use-case-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 25px; border-radius: 12px; margin-bottom: 20px; }
+        .use-case-card h4 { color: var(--highlight-color, #00f0ff); font-size: 1.2rem; margin-bottom: 10px; }
+        .use-case-card i { margin-right: 10px; }
+        .code-block { background: #0d1117; color: #c9d1d9; padding: 20px; border-radius: 8px; font-family: 'Fira Code', monospace; font-size: 0.95rem; overflow-x: auto; border: 1px solid #30363d; margin-bottom: 30px; }
+        .code-block .keyword { color: #ff7b72; }
+        .code-block .string { color: #a5d6ff; }
+        .api-cta { text-align: center; margin-top: 50px; padding: 40px; background: rgba(0, 240, 255, 0.05); border-radius: 12px; border: 1px solid rgba(0, 240, 255, 0.2); }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <a href="index.html" style="text-decoration:none; color:inherit;"><i class="fa-solid fa-shield-halved"></i> CodeGuard<span>.AI</span></a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html#features">Features</a></li>
+                <li><a href="index.html#technology">Engine</a></li>
+                <li>
+                    <button id="theme-toggle" class="theme-toggle-btn" title="Toggle Light Mode" style="margin-right: 15px;">
+                        <i class="fa-solid fa-sun"></i>
+                    </button>
+                </li>
+                <li><a href="login.html" class="btn-login">Login</a></li>
+                <li><a href="signup.html" class="btn-primary">Get Started</a></li>
+            </ul>
+            <div class="hamburger">
+                <i class="fa-solid fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="container" style="text-align: center;">
+            <h1><span class="highlight">API Access</span> & Integration</h1>
+            <p>Automate code forensic checks directly within your own infrastructure.</p>
+        </div>
+    </header>
+
+    <section class="page-content">
+        <h2>What is the CodeGuard API?</h2>
+        <p>The CodeGuard AI API allows developers, schools, and businesses to integrate our advanced plagiarism and AI-generation detection engine directly into their own systems. Instead of manually uploading files through our web dashboard, your servers can talk to our servers programmatically, enabling seamless automation at scale.</p>
+
+        <h2>Primary Use Cases</h2>
+        
+        <div class="use-case-card">
+            <h4><i class="fa-solid fa-code-merge"></i> Automated CI/CD Pipelines</h4>
+            <p>Integrate CodeGuard directly into your GitHub Actions, GitLab CI, or Jenkins pipelines. Automatically scan every pull request. If the structural similarity or AI-generation score exceeds your company's threshold, the PR is automatically blocked from merging, keeping your codebase pure.</p>
+        </div>
+
+        <div class="use-case-card">
+            <h4><i class="fa-solid fa-graduation-cap"></i> LMS Integration for Education</h4>
+            <p>Universities can connect their Learning Management Systems (Canvas, Moodle, Blackboard) to our API via webhooks. The moment a student submits a programming assignment, CodeGuard automatically processes the AST logic in the background and attaches a forensic similarity report to the teacher's grading view.</p>
+        </div>
+
+        <div class="use-case-card">
+            <h4><i class="fa-solid fa-database"></i> Bulk Repository Scanning</h4>
+            <p>Enterprise clients undertaking massive security audits or legacy code ingestion can use the API to batch-submit thousands of files concurrently, bypassing frontend limitations to map out code origin dependencies across enormous monolithic repositories.</p>
+        </div>
+
+        <h2>Developer Quickstart</h2>
+        <p>A simple REST endpoint to submit code for analysis. Generate your API key in the dashboard.</p>
+
+        <h3>cURL Example</h3>
+        <div class="code-block">
+<pre><span class="keyword">curl</span> -X POST http://api.codeguard.ai/v1/scan \
+  -H <span class="string">"Authorization: Bearer YOUR_API_KEY"</span> \
+  -H <span class="string">"Content-Type: application/json"</span> \
+  -d '{
+    <span class="string">"filename"</span>: <span class="string">"auth_controller.js"</span>,
+    <span class="string">"code"</span>: <span class="string">"const login = (req, res) => { ... }"</span>
+  }'</pre>
+        </div>
+
+        <h3>Node.js Example</h3>
+        <div class="code-block">
+<pre><span class="keyword">const</span> axios = <span class="keyword">require</span>(<span class="string">'axios'</span>);
+
+<span class="keyword">async function</span> scanCode(codeString) {
+    <span class="keyword">const</span> response = <span class="keyword">await</span> axios.post(<span class="string">'https://api.codeguard.ai/v1/scan'</span>, {
+        filename: <span class="string">'script.py'</span>,
+        code: codeString
+    }, {
+        headers: { <span class="string">'Authorization'</span>: <span class="string">'Bearer YOUR_API_KEY'</span> }
+    });
+    
+    console.log(<span class="string">'AI Score:'</span>, response.data.ai_score);
+    console.log(<span class="string">'Plagiarism Probability:'</span>, response.data.plagiarism_score);
+}</pre>
+        </div>
+
+        <div class="api-cta">
+            <h3 style="margin-top:0;">Ready to Automate?</h3>
+            <p>Sign up to generate an API key and read the full technical docs.</p>
+            <a href="signup.html" class="btn-primary" style="display:inline-block; margin-top: 15px;">Generate API Key</a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container footer-content">
+            <div class="footer-col">
+                <h3>CodeGuard.AI</h3>
+                <p>Advanced plagiarism detection for the modern software ecosystem.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Platform</h4>
+                <a href="https://codeguard-7e692.web.app/signup.html">Logic Checker</a>
+                <a href="https://codeguard-7e692.web.app/signup.html">AI Detector</a>
+                <a href="api.html">API Access</a>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <a href="about.html">About Us</a>
+                <a href="careers.html">Careers</a>
+                <a href="privacy.html">Privacy Policy</a>
+            </div>
+            <div class="footer-col">
+                <h4>Connect</h4>
+                <div class="socials">
+                    <a href="https://x.com/mvd6408?s=21" target="_blank"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="https://github.com/MaharshiMD" target="_blank"><i class="fa-brands fa-github"></i></a>
+                    <a href="https://www.linkedin.com/in/maharshi-dihora" target="_blank"><i class="fa-brands fa-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 CodeGuard AI. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
