@@ -24,7 +24,7 @@ const firebaseConfig = {
 const GEMINI_API_KEY = "AIzaSyA-NUndTIebwt2H8VRgFA0Za0ml6kINZ5Y";
 
 // Replace this with your Render backend URL after deploying the Express backend.
-const BACKEND_BASE_URL = "https://your-app.onrender.com";
+const BACKEND_BASE_URL = "https://cguard-o3ek.onrender.com/";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
