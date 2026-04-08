@@ -23,6 +23,9 @@ const firebaseConfig = {
 // ⚠️ YOUR API KEY (Preserved from your snippet)
 const GEMINI_API_KEY = "AIzaSyA-NUndTIebwt2H8VRgFA0Za0ml6kINZ5Y";
 
+// Replace this with your Render backend URL after deploying the Express backend.
+const BACKEND_BASE_URL = "https://your-app.onrender.com";
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -33,6 +36,23 @@ const googleProvider = new GoogleAuthProvider();
 const githubProvider = new GithubAuthProvider();
 const appleProvider = new OAuthProvider('apple.com');
 githubProvider.addScope('repo'); // Request repository access
+
+async function callBackendAnalyze(code1, code2, language = 'javascript') {
+    const response = await fetch(`${BACKEND_BASE_URL}/api/analyze`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ code1, code2, language })
+    });
+
+    if (!response.ok) {
+        const payload = await response.text();
+        throw new Error(`Backend analysis failed (${response.status}): ${payload}`);
+    }
+
+    return response.json();
+}
 
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
@@ -1567,10 +1587,12 @@ window.scanBulkComparison = async function(type) {
     
     let textToAnalyze = "";
     let prompt = "";
+    let sourceVal = "";
+    let targetVal = "";
 
     if (type === 'group') {
-        const sourceVal = document.getElementById('bulk-group-source').value.trim();
-        const targetVal = document.getElementById('bulk-group-target').value.trim();
+        sourceVal = document.getElementById('bulk-group-source').value.trim();
+        targetVal = document.getElementById('bulk-group-target').value.trim();
         if (!sourceVal || !targetVal) {
             alert("Please paste text into both Source A and Target B.");
             return;
@@ -1608,20 +1630,45 @@ window.scanBulkComparison = async function(type) {
     btn.style.opacity = "0.7";
 
     try {
-        const preferredModel = localStorage.getItem('preferredModel') || 'models/gemini-2.5-flash';
-        const activeModel = genAI.getGenerativeModel({
-            model: preferredModel,
-            generationConfig: { temperature: 0.1 }
-        });
+        let data;
 
-        const result = await activeModel.generateContent(prompt);
-        let textResponse = result.response.text();
-        
-        // Robustly extract JSON from anywhere in the response
-        const bulkJsonMatch = textResponse.match(/\{[\s\S]*\}/);
-        if (!bulkJsonMatch) throw new Error("AI did not return valid JSON for bulk scan.");
-        const data = JSON.parse(bulkJsonMatch[0]);
-        
+        if (type === 'group') {
+            try {
+                const backendResult = await callBackendAnalyze(sourceVal, targetVal, 'javascript');
+                const score = Math.round((backendResult.similarity ?? 0) * 100);
+                data = {
+                    overall_similarity_score: score,
+                    explanation: `AST ${Math.round((backendResult.astScore ?? 0) * 100)}%, fingerprint ${Math.round((backendResult.fingerprintScore ?? 0) * 100)}%, stylometry ${Math.round((backendResult.stylometryScore ?? 0) * 100)}%. Risk: ${backendResult.riskLevel}.`,
+                    backend: true
+                };
+            } catch (backendErr) {
+                console.warn("Render backend unavailable, falling back to AI bulk comparison:", backendErr.message);
+                const preferredModel = localStorage.getItem('preferredModel') || 'models/gemini-2.5-flash';
+                const activeModel = genAI.getGenerativeModel({
+                    model: preferredModel,
+                    generationConfig: { temperature: 0.1 }
+                });
+
+                const result = await activeModel.generateContent(prompt);
+                let textResponse = await result.response.text();
+                const bulkJsonMatch = textResponse.match(/\{[\s\S]*\}/);
+                if (!bulkJsonMatch) throw new Error("AI did not return valid JSON for bulk scan.");
+                data = JSON.parse(bulkJsonMatch[0]);
+            }
+        } else {
+            const preferredModel = localStorage.getItem('preferredModel') || 'models/gemini-2.5-flash';
+            const activeModel = genAI.getGenerativeModel({
+                model: preferredModel,
+                generationConfig: { temperature: 0.1 }
+            });
+
+            const result = await activeModel.generateContent(prompt);
+            let textResponse = await result.response.text();
+            const bulkJsonMatch = textResponse.match(/\{[\s\S]*\}/);
+            if (!bulkJsonMatch) throw new Error("AI did not return valid JSON for bulk scan.");
+            data = JSON.parse(bulkJsonMatch[0]);
+        }
+
         // Update UI instead of alert
         const resultsArea = document.getElementById('bulk-results-area');
         const scoreText = document.getElementById('bulk-score-text');
