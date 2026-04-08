@@ -8,9 +8,14 @@ const logger = require('./utils/logger');
 const connectDB = require('./config/database');
 
 const app = express();
+app.get("/", (req, res) => {
+  res.send("CodeGuard Backend is Running 🚀");
+});
 
 // Connect to DB
 connectDB();
+
+
 
 // Security middleware
 app.use(helmet());
