@@ -1,17 +1,11 @@
 const { onCall, HttpsError, onRequest } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const { compareAST } = require("./engines/ast");
 const { compareFingerprints } = require("./engines/fingerprint");
 const { compareStylometry } = require("./engines/stylometry");
 
 admin.initializeApp();
-
-if (!process.env.GEMINI_API_KEY) {
-    console.error("FATAL: GEMINI_API_KEY environment variable is not set.");
-}
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 exports.analyzeCode = onCall({ cors: true }, async (request) => {
     if (!request.auth) {
@@ -49,43 +43,17 @@ exports.analyzeCode = onCall({ cors: true }, async (request) => {
             }
         });
 
-        // 3. AI Analysis
-        const model = genAI.getGenerativeModel({ model: "models/gemini-2.5-flash" });
         const stylometryScore = compareStylometry(code, code);
-        const prompt = `
-        You are a code forensic expert. Analyze this code (${filename}) for plagiarism and AI generation.
-        We already found: Structural Similarity: ${maxStructuralSimilarity}%, Fingerprint Similarity: ${maxFingerprintSimilarity}%.
-        Matched Source: ${matchedFile}.
-        
-        ANALYSIS REQUIREMENTS:
-        - Cross-Language Detection: Identify if this logic mirrors algorithms in other languages (e.g. Python vs Java).
-        - Program Dependency Graph (PDG): Analyze data and control dependencies to detect deep logical clones.
-        - Algorithm Recognition: Detect specific patterns like DFS, BFS, or DP.
-        
-        CODE:
-        '''${code}'''
-        
-        Strictly return raw JSON data (no markdown, no code fences):
-        {
-            "plagiarism_score": (overall combined score 0-100),
-            "ai_score": (AI generation confidence 0-100),
-            "semantic_similarity": (0-100 score for logical similarity),
-            "stylometry_score": ${stylometryScore},
-            "algorithm_type": "string",
-            "clone_type": "string",
-            "cross_language_match": (boolean),
-            "pdg_similarity": (0-100 score),
-            "explanation": (concise summary string)
-        }
-        `;
-
-        const result = await model.generateContent(prompt);
-        const text = (await result.response).text();
-        const cleanJson = text.replace(/```json/g, "").replace(/```/g, "").trim();
-        const aiData = JSON.parse(cleanJson);
-
         const responseData = {
-            ...aiData,
+            plagiarism_score: Math.round(Math.min(100, (maxStructuralSimilarity * 0.5 + maxFingerprintSimilarity * 0.3 + stylometryScore * 0.2) * 100)),
+            ai_score: 0,
+            semantic_similarity: Math.round(Math.min(100, (maxStructuralSimilarity * 0.4 + maxFingerprintSimilarity * 0.4 + stylometryScore * 0.2) * 100)),
+            stylometry_score: Math.round(stylometryScore * 100),
+            algorithm_type: "Internal Code Scan",
+            clone_type: maxStructuralSimilarity > 0.7 ? "Type-2 Renamed" : "Original",
+            cross_language_match: false,
+            pdg_similarity: 0,
+            explanation: "Analysis completed by internal CodeGuard heuristics based on structural and fingerprint similarity against stored scans.",
             structural_score: maxStructuralSimilarity,
             fingerprint_score: maxFingerprintSimilarity,
             matched_source: matchedFile,
@@ -124,43 +92,36 @@ exports.analyzePaper = onCall({ cors: true }, async (request) => {
     }
 
     try {
-        const model = genAI.getGenerativeModel({ model: "models/gemini-2.5-flash", generationConfig: { temperature: 0.1 } });
-        
-        // Ensure we fit within context limits for very large papers
-        const safeText = text.length > 250000 ? text.substring(0, 250000) + "...[truncated]" : text;
+        const cleaned = text.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim();
+        const words = (cleaned.toLowerCase().match(/\b[a-z0-9']+\b/g) || []).map(w => w.replace(/'/g, ''));
+        const totalWords = words.length;
+        const uniqueWords = new Set(words).size;
+        const uniqueWordRatio = totalWords ? uniqueWords / totalWords : 1;
+        const repeatScore = 1 - uniqueWordRatio;
+        const sentences = cleaned.split(/[.!?]+/).filter(s => s.trim());
+        const avgSentenceLength = sentences.length ? totalWords / sentences.length : totalWords;
+        const lengthScore = Math.min(1, Math.max(0, (avgSentenceLength - 15) / 20));
+        const lengthWeight = Math.min(1, totalWords / 500);
 
-        const prompt = `
-        You are an expert academic forensic analyst. Analyze this document (${filename}) for plagiarism, duplication against internet databases, and AI generation markers.
-        Look for sudden tone shifts, hallmark AI phrasing (e.g. "delve", "testament to", "crucial"), and known internet sources.
-        
-        DOCUMENT TEXT:
-        '''${safeText}'''
-        
-        Strictly return raw JSON data (no markdown, no code fences):
-        {
-            "plagiarism_score": (overall confidence of plagiarism 0-100),
-            "ai_score": (overall confidence of AI generation 0-100),
-            "semantic_similarity": (0-100, how closely this tracks known public essays/articles),
-            "matched_source": "Name of primary plagiarized internet source or database, else 'Original'",
-            "source_url": "HTTPS URL of the matched source if applicable, else 'none'",
-            "explanation": "Brief 2-3 sentence explanation of your findings (why you flagged it for AI or plagiarism)."
-        }
-        `;
-
-        const result = await model.generateContent(prompt);
-        let responseText = (await result.response).text();
-        const cleanJson = responseText.replace(/^```json[\s\S]*?(\{)/m, '$1').replace(/```$/g, '').trim();
-        const aiData = JSON.parse(cleanJson);
+        const plagiarism_score = Math.round(Math.min(70, repeatScore * 40 + lengthScore * 20 + lengthWeight * 10));
+        const ai_score = Math.round(Math.min(50, repeatScore * 30 + lengthScore * 15));
+        const semantic_similarity = Math.round(Math.min(60, repeatScore * 30 + lengthScore * 20));
+        const stylometry_score = Math.round(Math.min(55, lengthScore * 35 + repeatScore * 20));
 
         const responseData = {
-            ...aiData,
+            plagiarism_score,
+            ai_score,
+            semantic_similarity,
+            stylometry_score,
             structural_score: 0,
             fingerprint_score: 0,
-            stylometry_score: 0,
             pdg_similarity: 0,
             cross_language_match: false,
             algorithm_type: "Research Paper",
             clone_type: "N/A",
+            matched_source: "Internal Analysis",
+            source_url: "#",
+            explanation: `Document analysis completed by internal heuristic metrics; external AI is not used.`,
             matched_code: "",
             timestamp: new Date().toISOString()
         };
@@ -243,35 +204,17 @@ exports.scan = onRequest({ cors: true }, async (req, res) => {
             }
         });
 
-        // 3b. AI Analysis
-        const model = genAI.getGenerativeModel({ model: "models/gemini-2.5-flash" });
         const stylometryScore = compareStylometry(code, code);
-        const prompt = `
-        You are a code forensic expert. Analyze this code (${safeFilename}) for plagiarism and AI generation.
-        We already found: Structural Similarity: ${maxStructuralSimilarity}%, Fingerprint Similarity: ${maxFingerprintSimilarity}%.
-        Matched Source: ${matchedFile}.
-        
-        Strictly return raw JSON data (no markdown, no code fences):
-        {
-            "plagiarism_score": (0-100),
-            "ai_score": (0-100),
-            "semantic_similarity": (0-100),
-            "stylometry_score": ${stylometryScore},
-            "algorithm_type": "string",
-            "clone_type": "string",
-            "cross_language_match": (boolean),
-            "pdg_similarity": (0-100),
-            "explanation": "string"
-        }
-        `;
-
-        const result = await model.generateContent(prompt);
-        let text = (await result.response).text();
-        const cleanJson = text.replace(/```json/g, "").replace(/```/g, "").trim();
-        const aiData = JSON.parse(cleanJson);
-
         const responseData = {
-            ...aiData,
+            plagiarism_score: Math.round(Math.min(100, (maxStructuralSimilarity * 0.5 + maxFingerprintSimilarity * 0.3 + stylometryScore * 0.2) * 100)),
+            ai_score: 0,
+            semantic_similarity: Math.round(Math.min(100, (maxStructuralSimilarity * 0.4 + maxFingerprintSimilarity * 0.4 + stylometryScore * 0.2) * 100)),
+            stylometry_score: Math.round(stylometryScore * 100),
+            algorithm_type: "Internal Code Scan",
+            clone_type: maxStructuralSimilarity > 0.7 ? "Type-2 Renamed" : "Original",
+            cross_language_match: false,
+            pdg_similarity: 0,
+            explanation: "Analysis completed by internal CodeGuard heuristics based on structural and fingerprint similarity against stored scans.",
             structural_score: maxStructuralSimilarity,
             fingerprint_score: maxFingerprintSimilarity,
             matched_source: matchedFile,

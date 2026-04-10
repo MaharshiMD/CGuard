@@ -6,6 +6,11 @@ const analyzeSchema = Joi.object({
   language: Joi.string().required()
 });
 
+const analyzeDocumentSchema = Joi.object({
+  text: Joi.string().required(),
+  filename: Joi.string().allow('').default('document.txt')
+});
+
 const submitSchema = analyzeSchema;
 
 const validate = (schema) => {
@@ -20,5 +25,6 @@ const validate = (schema) => {
 
 module.exports = {
   analyze: validate(analyzeSchema),
+  analyzeDocument: validate(analyzeDocumentSchema),
   submit: validate(submitSchema)
 };

@@ -11,6 +11,37 @@ const analyze = async (req, res, next) => {
   }
 };
 
+const analyzeDocument = async (req, res, next) => {
+  try {
+    const { text, filename } = req.body;
+    const result = await plagiarismService.analyzeDocument(text, filename);
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const scan = async (req, res, next) => {
+  try {
+    let fileContent, filename;
+    if (req.file) {
+      fileContent = req.file.buffer.toString('utf-8');
+      filename = req.file.originalname;
+    } else if (req.body.text) {
+      fileContent = req.body.text;
+      filename = req.body.filename || 'uploaded.txt';
+    } else {
+      return res.status(400).json({ error: 'No file or text provided' });
+    }
+    console.log('File content received:', fileContent.substring(0, 200) + '...');
+    const result = await plagiarismService.scanFile(fileContent, filename);
+    console.log('Analysis results:', result);
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const submit = async (req, res, next) => {
   try {
     const { code1, code2, language } = req.body;
@@ -49,4 +80,4 @@ const getSubmissions = async (req, res, next) => {
   }
 };
 
-module.exports = { analyze, submit, getSubmissions };
+module.exports = { analyze, analyzeDocument, scan, submit, getSubmissions };
