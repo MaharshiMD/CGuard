@@ -32,117 +32,103 @@ function cosineSimilarity(vec1, vec2) {
 
 function calculatePlagiarism(text) {
   const words = text.toLowerCase().split(/\s+/).filter(w => w.length > 0);
-  const wordCount = words.length;
+  const totalWords = words.length;
+  if (totalWords === 0) return 0;
 
-  // Base plagiarism if text exists
-  let plagiarism = 0;
-  if (wordCount > 0) {
-    plagiarism = Math.floor(Math.random() * 21) + 5; // 5-25
-  }
-
-  // If >20 words, ensure not 0
-  if (wordCount > 20) {
-    plagiarism = Math.max(plagiarism, 10);
-  }
-
-  // Count repeated words
+  // Word frequency
   const wordFreq = {};
   words.forEach(word => {
     wordFreq[word] = (wordFreq[word] || 0) + 1;
   });
-  const repeatedWords = Object.values(wordFreq).filter(freq => freq > 1).length;
-  const repetitionRatio = repeatedWords / words.length;
 
-  // Increase for repetitions
-  if (repetitionRatio > 0.1) {
-    plagiarism += Math.round(repetitionRatio * 20); // up to +20%
+  // Repeated word occurrences
+  let repeatedOccurrences = 0;
+  for (const freq of Object.values(wordFreq)) {
+    if (freq > 1) {
+      repeatedOccurrences += freq - 1; // only the extra occurrences
+    }
   }
+  let plagiarism = (repeatedOccurrences / totalWords) * 100;
 
-  // Check for duplicate lines
+  // Duplicate lines
   const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-  const uniqueLines = new Set(lines);
-  const duplicateLines = lines.length - uniqueLines.size;
-  if (duplicateLines > 0) {
-    plagiarism += Math.round((duplicateLines / lines.length) * 15); // up to +15%
+  const lineFreq = {};
+  lines.forEach(line => {
+    lineFreq[line] = (lineFreq[line] || 0) + 1;
+  });
+  let duplicateLineOccurrences = 0;
+  for (const freq of Object.values(lineFreq)) {
+    if (freq > 1) {
+      duplicateLineOccurrences += freq - 1;
+    }
+  }
+  if (lines.length > 0) {
+    plagiarism += (duplicateLineOccurrences / lines.length) * 50; // add up to 50%
   }
 
-  // Check for repeated phrases (2-grams)
+  // Repeated phrases (3-grams)
   const phrases = [];
-  for (let i = 0; i < words.length - 1; i++) {
-    phrases.push(words[i] + ' ' + words[i + 1]);
+  for (let i = 0; i < words.length - 2; i++) {
+    phrases.push(words.slice(i, i + 3).join(' '));
   }
   const phraseFreq = {};
   phrases.forEach(phrase => {
     phraseFreq[phrase] = (phraseFreq[phrase] || 0) + 1;
   });
-  const repeatedPhrases = Object.values(phraseFreq).filter(freq => freq > 1).length;
-  if (repeatedPhrases > 0) {
-    plagiarism += Math.round((repeatedPhrases / phrases.length) * 10); // up to +10%
+  let repeatedPhraseOccurrences = 0;
+  for (const freq of Object.values(phraseFreq)) {
+    if (freq > 1) {
+      repeatedPhraseOccurrences += freq - 1;
+    }
+  }
+  if (phrases.length > 0) {
+    plagiarism += (repeatedPhraseOccurrences / phrases.length) * 30; // add up to 30%
   }
 
-  // Cap at 40%
-  return Math.min(40, Math.max(5, plagiarism));
+  return Math.min(100, Math.max(0, plagiarism));
 }
 
 function calculateAI(text) {
-  // Base AI score
-  let aiScore = Math.floor(Math.random() * 21) + 5; // 5-25
+  let aiScore = 0;
 
-  const words = text.toLowerCase().split(/\s+/).filter(w => w.length > 0);
-  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-
-  // Check for repeated phrases (2-grams)
-  const phrases = [];
-  for (let i = 0; i < words.length - 1; i++) {
-    phrases.push(words[i] + ' ' + words[i + 1]);
-  }
-  const phraseFreq = {};
-  phrases.forEach(phrase => {
-    phraseFreq[phrase] = (phraseFreq[phrase] || 0) + 1;
-  });
-  const repeatedPhrases = Object.values(phraseFreq).filter(freq => freq > 1).length;
-  if (repeatedPhrases > 0) {
-    aiScore += Math.round((repeatedPhrases / phrases.length) * 15); // up to +15%
+  // Repeated phrases using regex (simple: repeated words)
+  const repeatedWordMatches = text.match(/\b(\w+)\b(?=.*\b\1\b)/g);
+  if (repeatedWordMatches) {
+    aiScore += (repeatedWordMatches.length / text.split(/\s+/).length) * 40;
   }
 
-  // Long structured sentences
+  // Sentence length variation
   const sentences = text.split(/[.!?]+/).filter(s => s.trim());
-  const avgWordsPerSentence = sentences.length ? words.length / sentences.length : 0;
-  if (avgWordsPerSentence > 20) {
-    aiScore += Math.round((avgWordsPerSentence - 20) / 10 * 10); // increase for very long sentences
-  }
-
-  // Simple code detection: reduce AI for simple, short code
-  const isCode = /\b(def|function|class|if|for|while|print|import|const|let|var)\b/.test(text);
-  if (isCode) {
-    const codeLines = lines.filter(l => l.includes('def') || l.includes('function') || l.includes('class') || l.includes('if') || l.includes('for') || l.includes('print'));
-    const simpleCodeRatio = codeLines.length / lines.length;
-    if (simpleCodeRatio > 0.5 && lines.length < 10) {
-      aiScore = Math.max(5, aiScore - 10); // reduce for simple short code
+  if (sentences.length > 1) {
+    const lengths = sentences.map(s => s.split(/\s+/).length);
+    const avgLength = lengths.reduce((a, b) => a + b, 0) / lengths.length;
+    const variance = lengths.reduce((sum, len) => sum + Math.pow(len - avgLength, 2), 0) / lengths.length;
+    const stdDev = Math.sqrt(variance);
+    // Low stdDev means similar lengths, increase AI
+    if (stdDev < 5) {
+      aiScore += (5 - stdDev) / 5 * 30; // up to 30%
     }
   }
 
-  // Repetitive patterns
+  // Excessive repetition (duplicate lines)
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
   const uniqueLines = new Set(lines);
   const repetitionRatio = 1 - (uniqueLines.size / lines.length);
-  if (repetitionRatio > 0.2) {
-    aiScore += Math.round(repetitionRatio * 20); // up to +20%
-  }
+  aiScore += repetitionRatio * 30; // up to 30%
 
-  // Cap at 40%
-  return Math.min(40, Math.max(5, aiScore));
+  return Math.min(100, Math.max(0, aiScore));
 }
 
 function calculateRisk(text) {
-  const riskKeywords = ['eval', 'exec', 'os.system', 'subprocess', 'shell_exec', 'system', 'popen', 'dangerous'];
+  const riskKeywords = ['eval', 'exec', 'os.system', 'subprocess', 'rm -rf', 'child_process', 'dangerous', 'shell', 'system'];
   const lowerText = text.toLowerCase();
   let riskCount = 0;
   riskKeywords.forEach(keyword => {
-    const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
+    const regex = new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
     const matches = lowerText.match(regex);
     if (matches) riskCount += matches.length;
   });
-  return Math.min(100, riskCount * 20); // Each keyword adds 20% risk
+  return Math.min(100, riskCount * 20); // Each occurrence adds 20%
 }
 
 async function analyzePlagiarism(code1, code2, language) {
@@ -204,15 +190,17 @@ async function analyzeDocument(text, filename) {
 }
 
 async function scanFile(text, filename) {
+  console.log("Text length:", text.length);
   const plagiarism = calculatePlagiarism(text);
   const ai = calculateAI(text);
   const risk = calculateRisk(text);
-
-  return {
+  const result = {
     plagiarism,
     ai,
     risk
   };
+  console.log("Scores:", result);
+  return result;
 }
 
 module.exports = { analyzePlagiarism, analyzeDocument, scanFile };
