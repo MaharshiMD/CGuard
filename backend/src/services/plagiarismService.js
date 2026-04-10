@@ -85,28 +85,52 @@ function calculatePlagiarism(text) {
 }
 
 function calculateAI(text) {
-  // Basic heuristic: repetitive patterns, unnatural structure
+  // Base AI score
+  let aiScore = Math.floor(Math.random() * 21) + 5; // 5-25
+
+  const words = text.toLowerCase().split(/\s+/).filter(w => w.length > 0);
   const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+
+  // Check for repeated phrases (2-grams)
+  const phrases = [];
+  for (let i = 0; i < words.length - 1; i++) {
+    phrases.push(words[i] + ' ' + words[i + 1]);
+  }
+  const phraseFreq = {};
+  phrases.forEach(phrase => {
+    phraseFreq[phrase] = (phraseFreq[phrase] || 0) + 1;
+  });
+  const repeatedPhrases = Object.values(phraseFreq).filter(freq => freq > 1).length;
+  if (repeatedPhrases > 0) {
+    aiScore += Math.round((repeatedPhrases / phrases.length) * 15); // up to +15%
+  }
+
+  // Long structured sentences
+  const sentences = text.split(/[.!?]+/).filter(s => s.trim());
+  const avgWordsPerSentence = sentences.length ? words.length / sentences.length : 0;
+  if (avgWordsPerSentence > 20) {
+    aiScore += Math.round((avgWordsPerSentence - 20) / 10 * 10); // increase for very long sentences
+  }
+
+  // Simple code detection: reduce AI for simple, short code
+  const isCode = /\b(def|function|class|if|for|while|print|import|const|let|var)\b/.test(text);
+  if (isCode) {
+    const codeLines = lines.filter(l => l.includes('def') || l.includes('function') || l.includes('class') || l.includes('if') || l.includes('for') || l.includes('print'));
+    const simpleCodeRatio = codeLines.length / lines.length;
+    if (simpleCodeRatio > 0.5 && lines.length < 10) {
+      aiScore = Math.max(5, aiScore - 10); // reduce for simple short code
+    }
+  }
+
+  // Repetitive patterns
   const uniqueLines = new Set(lines);
   const repetitionRatio = 1 - (uniqueLines.size / lines.length);
+  if (repetitionRatio > 0.2) {
+    aiScore += Math.round(repetitionRatio * 20); // up to +20%
+  }
 
-  // Sentence variation (simple)
-  const sentences = text.split(/[.!?]+/).filter(s => s.trim());
-  const avgWordsPerSentence = sentences.length ? text.split(/\s+/).length / sentences.length : 0;
-  const variation = sentences.length > 1 ? Math.min(1, Math.abs(avgWordsPerSentence - 15) / 15) : 0;
-
-  // Perplexity-like: unusual word frequency
-  const words = text.toLowerCase().match(/\b\w+\b/g) || [];
-  const wordFreq = {};
-  words.forEach(w => wordFreq[w] = (wordFreq[w] || 0) + 1);
-  const entropy = Object.values(wordFreq).reduce((sum, freq) => {
-    const p = freq / words.length;
-    return sum - p * Math.log2(p);
-  }, 0);
-  const perplexity = Math.pow(2, entropy);
-
-  const aiScore = Math.min(100, (repetitionRatio * 30 + variation * 20 + (perplexity > 50 ? 50 : 0)));
-  return Math.round(aiScore);
+  // Cap at 40%
+  return Math.min(40, Math.max(5, aiScore));
 }
 
 function calculateRisk(text) {
